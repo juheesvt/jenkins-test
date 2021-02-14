@@ -1,12 +1,16 @@
 pipeline {
     // 스테이지 별로 다른 거
+    // 현재 노드가 하나만 존재하니 아무거나 씀
     agent any
 
+    // 해당 파이프라인이 얼마의 주기로 트리거될건
     triggers {
         pollSCM('*/3 * * * *')
     }
 
+    // 해당 파이프라인에서 사용할 환경변
     environment {
+        // aws resource에 접근하기 위한 환경변수
       AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId')
       AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey')
       AWS_DEFAULT_REGION = 'ap-northeast-2'
@@ -17,11 +21,11 @@ pipeline {
         // 레포지토리를 다운로드 받음
         stage('Prepare') {
             agent any
-            
+
             steps {
                 echo 'Clonning Repository'
 
-                git url: 'https://github.com/frontalnh/temp.git',
+                git url: 'https://github.com/juheesvt/jenkins-test',
                     branch: 'master',
                     credentialsId: 'jenkinsgit'
             }
@@ -50,7 +54,7 @@ pipeline {
             // 프론트엔드 디렉토리의 정적파일들을 S3 에 올림, 이 전에 반드시 EC2 instance profile 을 등록해야함.
             dir ('./website'){
                 sh '''
-                aws s3 sync ./ s3://namhoontest
+                aws s3 sync ./ s3://jsvt-jenkins-test
                 '''
             }
           }
@@ -61,18 +65,18 @@ pipeline {
               success {
                   echo 'Successfully Cloned Repository'
 
-                  mail  to: 'frontalnh@gmail.com',
-                        subject: "Deploy Frontend Success",
-                        body: "Successfully deployed frontend!"
+//                   mail  to: 'frontalnh@gmail.com',
+//                         subject: "Deploy Frontend Success",
+//                         body: "Successfully deployed frontend!"
 
               }
 
               failure {
                   echo 'I failed :('
 
-                  mail  to: 'frontalnh@gmail.com',
-                        subject: "Failed Pipelinee",
-                        body: "Something is wrong with deploy frontend"
+//                   mail  to: 'frontalnh@gmail.com',
+//                         subject: "Failed Pipelinee",
+//                         body: "Something is wrong with deploy frontend"
               }
           }
         }
@@ -84,7 +88,7 @@ pipeline {
                 image 'node:latest'
               }
             }
-            
+
             steps {
               dir ('./server'){
                   sh '''
@@ -151,7 +155,7 @@ pipeline {
               mail  to: 'frontalnh@gmail.com',
                     subject: "Deploy Success",
                     body: "Successfully deployed!"
-                  
+
             }
           }
         }
