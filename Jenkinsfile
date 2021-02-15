@@ -8,11 +8,11 @@ pipeline {
         pollSCM('*/3 * * * *')
     }
 
-    // 해당 파이프라인에서 사용할 환경변
+//     // 해당 파이프라인에서 사용할 환경변
     environment {
         // aws resource에 접근하기 위한 환경변수
-      AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId')
-      AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey')
+      AWS_ACCESS_KEY_ID = credentials('awsAccessKeyIdForJenkins')
+      AWS_SECRET_ACCESS_KEY = credentials('awsAccessKeyForJenkins')
       AWS_DEFAULT_REGION = 'ap-northeast-2'
       HOME = '.' // Avoid npm root owned
     }
@@ -25,9 +25,9 @@ pipeline {
             steps {
                 echo 'Clonning Repository'
 
-                git url: 'https://github.com/juheesvt/jenkins-test',
+                git url: 'https://github.com/juheesvt/jenkins-test.git',
                     branch: 'master',
-                    credentialsId: 'jenkinsgit'
+                    credentialsId: 'tokenforjenkins-jsvt'
             }
 
             post {
@@ -54,7 +54,7 @@ pipeline {
             // 프론트엔드 디렉토리의 정적파일들을 S3 에 올림, 이 전에 반드시 EC2 instance profile 을 등록해야함.
             dir ('./website'){
                 sh '''
-                aws s3 sync ./ s3://jsvt-jenkins-test
+                aws s3 sync ./ s3://jsvt-jenkins-test2
                 '''
             }
           }
